@@ -88,22 +88,24 @@ try (OutputStream os = con.getOutputStream()) {{
             return text
         return text.replace('"', '\\"')
 
-    def format_code(self):
+    def sanitize_input(self):
         self.http_request.url = self.replace_quotes(self.http_request.url)
         self.http_request.data = self.replace_quotes(self.http_request.data)
         self.http_request.url = self.replace_quotes(self.http_request.url)
 
         d = self.http_request.headers
-        for key, val in d.items() or []:
-            d[key] = self.replace_quotes(d[key])
+        if d:
+            for key, val in d.items() or []:
+                d[key] = self.replace_quotes(d[key])
 
         d = self.http_request.cookies
-        for key, val in d.items() or []:
-            d[key] = self.replace_quotes(d[key])
+        if d:
+            for key, val in d.items() or []:
+                d[key] = self.replace_quotes(d[key])
         # todo params as well
 
     def generate_code(self):
-        self.format_code()
+        self.sanitize_input()
         self.generate_import_statement()
         self.generate_connection_statements()
         self.generate_headers()

@@ -57,6 +57,9 @@ class CurlParser(Parser):
 
         if curl.method:
             curl.method = curl.method.upper()
+            methods = {'HEAD', 'GET', 'DELETE', 'OPTIONS', 'PATCH', 'POST', 'PUT'}
+            if curl.method not in methods:
+                CurlParsingException(f'Method {curl.method} is not a valid http method')
         else:
             curl.method = 'GET'
         http_request.method = curl.method

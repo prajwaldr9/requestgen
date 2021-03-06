@@ -13,7 +13,7 @@ setup(
     name="requestgen",
     version=VERSION,
     author="Prajwal Ramakrishna",
-    url='https://example.com',
+    url='https://github.com/prajwaldr9/requestgen',
     author_email="prajwaldr9@gmail.com",
     license='GNU GPL',
     description=DESCRIPTION,

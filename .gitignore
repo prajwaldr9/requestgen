@@ -2,3 +2,4 @@ requestgen/generator/test.py
 .idea
 venv
 **/input.txt
+**/__pycache__
