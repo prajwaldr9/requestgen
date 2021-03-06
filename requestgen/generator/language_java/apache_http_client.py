@@ -2,38 +2,49 @@ from requestgen.generator.generator import Generator
 from requestgen.parser.curl_parser import CurlParser
 
 
-class JavaHttpUrlConnectionGenerator(Generator):
+class ApacheHttpClientCodeGenerator(Generator):
     cookies_template = "cookies = {{\n{text}}}"
     headers_template = "headers = {{\n{text}}}"
     data_template = "data = '{text}'"
     tab = '    '
 
     def __init__(self, http_request):
-        self.http_request = http_request
-        super().__init__()
+        super().__init__(http_request)
 
     def generate_import_statement(self):
-        self.code += 'import java.io.*;\nimport java.net.*;'
+        self.code += '''import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.client.methods.*;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
+import java.io.IOException;'''
         self.code += self.new_lines(2)
 
     def generate_headers(self):
+        text = ''
         d = self.http_request.headers
         if not d:
-            return
+            return text
         for key, val in d.items():
-            self.code += f'con.setRequestProperty("{key}", "{val}");\n'
-        self.code += self.new_lines(1)
+            text += f'request.addHeader("{key}", "{val}");\n'
+        text += self.new_lines(1)
+        return text
 
     def generate_cookies(self):
+        text = ''
         d = self.http_request.cookies
         if not d:
-            return
+            return text
         cookie_val = ''
         for key, val in d.items():
             cookie_val += f'{key}={val}; '
         cookie_val = cookie_val[:-2]
-        self.code += f'con.setRequestProperty("Cookie", "{cookie_val}");'
-        self.code += self.new_lines(2)
+        text += f'request.addHeader("Cookie", "{cookie_val}");'
+        text += self.new_lines(2)
+        return text
 
     def generate_call_and_result(self):
         result = '''int responseCode = con.getResponseCode();
@@ -82,36 +93,34 @@ try (OutputStream os = con.getOutputStream()) {{
             self.add(body_template.format(body))
             self.add(self.new_lines(2))
 
-    @staticmethod
-    def replace_quotes(text):
-        if not isinstance(text, str):
-            return text
-        return text.replace('"', '\\"')
-
-    def sanitize_input(self):
-        self.http_request.url = self.replace_quotes(self.http_request.url)
-        self.http_request.data = self.replace_quotes(self.http_request.data)
-        self.http_request.url = self.replace_quotes(self.http_request.url)
-
-        d = self.http_request.headers
-        if d:
-            for key, val in d.items() or []:
-                d[key] = self.replace_quotes(d[key])
-
-        d = self.http_request.cookies
-        if d:
-            for key, val in d.items() or []:
-                d[key] = self.replace_quotes(d[key])
-        # todo params as well
+    def get_method(self):
+        class_name = f'Http{self.http_request.method.capitalize()}'
+        return f'{class_name} request = new {class_name}("{self.http_request.url}");'
 
     def generate_code(self):
         self.sanitize_input()
         self.generate_import_statement()
-        self.generate_connection_statements()
-        self.generate_headers()
-        self.generate_cookies()
-        self.generate_method_and_data()
-        self.generate_call_and_result()
+        self.code += self.get_method() + self.new_lines(2)
+        self.code += self.generate_headers()
+        self.code += self.generate_cookies()
+
+        # If body exists
+        if self.http_request.data:
+            self.code += f'''String input = "{self.http_request.data}";
+request.setEntity(new StringEntity(input));'''
+            self.code += self.new_lines(2)
+
+        # execute and print the results success and failure
+        self.code += '''try (CloseableHttpClient httpClient = HttpClients.createDefault();
+    CloseableHttpResponse response = httpClient.execute(request)) {
+    System.out.println("Response code: " + response.getStatusLine().getStatusCode());
+    HttpEntity entity = response.getEntity();
+    if (entity != null) {
+        String result = EntityUtils.toString(entity);
+        System.out.println(result);
+    }
+}'''
+
         return self.code
 
 
@@ -125,7 +134,7 @@ def main():
     with open('../input.txt', 'r') as f:
         curl_command = f.read()
     http_request = CurlParser(curl_command).parse()
-    generator = JavaHttpUrlConnectionGenerator(http_request)
+    generator = ApacheHttpClientCodeGenerator(http_request)
     code = generator.generate_code()
     print(code)
     pass

@@ -21,7 +21,9 @@ setup(
     packages=find_packages(),
     install_requires=REQUIREMENTS,  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
-
+    entry_points={'console_scripts': [
+        'convert = requestgen.converter:main',
+    ], },
     keywords=['python', 'first package'],
     classifiers=[
         "Development Status :: 1 - Planning ",

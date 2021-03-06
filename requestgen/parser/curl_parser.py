@@ -14,7 +14,7 @@ class CurlParser(Parser):
 
     def __init__(self, curl_command):
         if not curl_command.startswith('curl'):
-            raise Exception('Not a curl command')
+            raise CurlParsingException('Not a curl command')
         curl_command = re.sub(r'\s+\\\s+', ' ', curl_command, flags=re.DOTALL)
         super().__init__(curl_command)
         self.curl_command = curl_command
@@ -28,7 +28,7 @@ class CurlParser(Parser):
         http_request = HttpRequest()
 
         if not curl.url.startswith('http'):
-            curl.url = f'http://{curl.url}'
+            curl.url = f'https://{curl.url}'
         http_request.url = curl.url
 
         assert curl.authentication is None

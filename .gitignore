@@ -1,5 +1,11 @@
-requestgen/generator/test.py
 .idea
 venv
-**/input.txt
+
 **/__pycache__
+**/test.py
+
+build/
+dist/
+requestgen.egg-info/
+
+**/input.txt

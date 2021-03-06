@@ -1,6 +1,7 @@
 from requestgen.generator.generator import Generator
 from requestgen.parser.curl_parser import CurlParser
 
+
 class PythonGenerator(Generator):
     cookies_template = "cookies = {{\n{text}}}"
     headers_template = "headers = {{\n{text}}}"
@@ -8,8 +9,7 @@ class PythonGenerator(Generator):
     tab = '    '
 
     def __init__(self, http_request):
-        self.http_request = http_request
-        self.code = ''
+        super().__init__(http_request, language='PYTHON')
 
     def generate_import_statement(self):
         self.code += 'import requests'
@@ -60,29 +60,8 @@ class PythonGenerator(Generator):
     def generate_print_response_stmt(self):
         self.code += 'print(response.content)'
 
-    @staticmethod
-    def replace_quotes(text):
-        if not isinstance(text, str):
-            return text
-        return text.replace("'", "\\'")
-
-    def format_code(self):
-        self.http_request.url = self.replace_quotes(self.http_request.url)
-        self.http_request.data = self.replace_quotes(self.http_request.data)
-        self.http_request.url = self.replace_quotes(self.http_request.url)
-
-        d = self.http_request.headers
-        for key, val in d.items() or []:
-            d[key] = self.replace_quotes(d[key])
-
-        d = self.http_request.cookies
-        for key, val in d.items() or []:
-            d[key] = self.replace_quotes(d[key])
-        # todo params as well
-
-
     def generate_code(self):
-        self.format_code()
+        self.sanitize_input()
         self.generate_import_statement()
         self.generate_headers_or_cookie(headers=False)
         self.generate_headers_or_cookie(headers=True)
@@ -99,7 +78,7 @@ def main():
     -X POST 
     -d "test body" --data-raw "test body2"
     http://example.com/example?a=1&b=2'''
-    with open('input.txt', 'r') as f:
+    with open('../input.txt', 'r') as f:
         curl_command = f.read()
     http_request = CurlParser(curl_command).parse()
     generator = PythonGenerator(http_request)
