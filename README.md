@@ -1,11 +1,16 @@
-# HTTP REQUEST GENERATOR AND CONVERTER
-This package can be used to generate the code to send http requests in several languages.
-It can also be used to convert the code from curl to other languages
+# HTTP Request Generator and Converter
+Converts CURL code to its equivalent in other programming languages
+
+You can convert the code from ```CURL``` to
+- Python requests
+- Java - HttpUrlConnection
+- Java - Apache HttpClient
+
+More languages will be added shortly
 
 ### Install
 ```pip install requestgen```
-or 
-Clone the repo and run the command
+or clone the repo and run the command
 ```python install setup.py```
 
 ### Usage
