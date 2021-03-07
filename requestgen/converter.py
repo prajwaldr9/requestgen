@@ -3,7 +3,7 @@ import sys
 from requestgen.generator.language_java import (apache_http_client,
                                                 http_url_connection)
 from requestgen.generator.language_python import python_generator
-from parser import curl_parser
+from requestgen.parser import curl_parser
 
 
 class CodeConversionException(Exception):
