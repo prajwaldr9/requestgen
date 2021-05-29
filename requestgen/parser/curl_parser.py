@@ -4,22 +4,21 @@ import argparse
 import shlex
 import re
 from http.cookies import SimpleCookie
+import logging as log
 
-
-class CurlParsingException(Exception):
-    pass
+log.basicConfig(format='%(asctime)s - %(message)s', level=log.DEBUG)
 
 
 class CurlParser(Parser):
 
     def __init__(self, curl_command):
-        if not curl_command.startswith('curl'):
-            raise CurlParsingException('Not a curl command')
+        if not curl_command.startswith('curl '):
+            raise ValueError('Not a curl command')
         curl_command = re.sub(r'\s+\\\s+', ' ', curl_command, flags=re.DOTALL)
         super().__init__(curl_command)
         self.curl_command = curl_command
 
-    def get_http_request(self, curl):
+    def get_http_request(self, curl) -> HttpRequest:
         """
         :return:
         """
@@ -42,7 +41,7 @@ class CurlParser(Parser):
                     key = key.strip()
                     val = val.lstrip()
                 except:
-                    raise CurlParsingException('Missing ":" in header')
+                    raise ValueError('Missing ":" in header')
                 if key in ['Cookie', 'cookie']:
                     for cookie_name, cookie_value in SimpleCookie(val).items():
                         cookies[cookie_name] = cookie_value.value
@@ -59,9 +58,13 @@ class CurlParser(Parser):
             curl.method = curl.method.upper()
             methods = {'HEAD', 'GET', 'DELETE', 'OPTIONS', 'PATCH', 'POST', 'PUT'}
             if curl.method not in methods:
-                CurlParsingException(f'Method {curl.method} is not a valid http method')
+                ValueError(f'Method {curl.method} is not a valid http method')
         else:
             curl.method = 'GET'
+
+        if curl.insecure:
+            http_request.insecure = True
+
         http_request.method = curl.method
         return http_request
 
@@ -70,6 +73,7 @@ class CurlParser(Parser):
         Main method to parse the curl command
         :return:
         """
+
         args = self.parse_args()
         return self.get_http_request(args)
 
@@ -78,13 +82,14 @@ class CurlParser(Parser):
             Enter a right curl command like 
             curl -H "Content-Type: application/json" -H "Authorization: 123" -X POST -d @mypostbody.json http://endpointurl.com/example
             """
-        parser = argparse.ArgumentParser(description="command line tool for CDET automation",
+        parser = argparse.ArgumentParser(description="CURL parser",
                                          epilog=examples)
         parser.add_argument('url')
         parser.add_argument('-H', '--header', dest='headers', action='append')
         parser.add_argument('-X', '--request', dest='method')
         parser.add_argument('-d', '--data', '--data-raw', dest='data', action='append')
         parser.add_argument('-u', '--user', dest='authentication')
+        parser.add_argument('-k', '--insecure', dest='insecure', action='store_true')
 
         # todo fill others as well
         safe_to_ignore_n_0 = [
@@ -95,15 +100,14 @@ class CurlParser(Parser):
             if nargs:
                 parser.add_argument(*i, nargs=nargs)
             else:
-                parser.add_argument(*i, action='store_true',)
+                parser.add_argument(*i, action='store_true', )
         parser.add_argument('-', action='store_true', dest='stdout')
 
         try:
             curl_args, unknown = parser.parse_known_args(shlex.split(self.curl_command)[1:])
             return curl_args
         except Exception as e:
-            print(e)
-            raise
+            raise ValueError('Unknown argument passed')
 
 
 def main():
@@ -117,7 +121,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-
-#todo
+# todo
 # will also work curl --data-urlencode "name=I am Daniel" http://www.example.com
 # read this https://curl.se/docs/httpscripting.html

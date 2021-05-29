@@ -120,9 +120,17 @@ request.setEntity(new StringEntity(input));'''
         System.out.println(result);
     }
 }'''
-
+        self.code += self.check_insecure_connection()
         return self.code
 
+    def check_insecure_connection(self):
+        if self.http_request.insecure:
+            result = '''
+// You have specified -k or --insecure in the input request
+// Please follow the steps to enable it
+// https://stackoverflow.com/questions/19517538/ignoring-ssl-certificate-in-apache-httpclient-4-3'''
+            return result
+        return ''
 
 def main():
     curl_command = '''curl -H "Content-Type:application/json" 

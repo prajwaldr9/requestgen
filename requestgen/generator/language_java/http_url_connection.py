@@ -52,8 +52,10 @@ while ((inputLine = in.readLine()) != null) {
 }
 in.close();
 
-System.out.println(response.toString());'''
+System.out.println(response.toString());
+'''
         self.add(result)
+
 
     def generate_connection_statements(self):
         self.code += f'''URL url = new URL("{self.http_request.url}");
@@ -87,7 +89,16 @@ try (OutputStream os = con.getOutputStream()) {{
         self.generate_cookies()
         self.generate_method_and_data()
         self.generate_call_and_result()
+        self.check_insecure_connection()
         return self.code
+
+    def check_insecure_connection(self):
+        if self.http_request.insecure:
+            result = '''
+// You have specified -k or --insecure in the input request
+// Please follow the steps to enable it
+// https://stackoverflow.com/questions/1201048/allowing-java-to-use-an-untrusted-certificate-for-ssl-https-connection'''
+            self.add(result)
 
 
 def main():

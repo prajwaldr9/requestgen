@@ -53,6 +53,10 @@ class PythonGenerator(Generator):
         # data
         if self.http_request.data:
             l.append('data=data')
+        # connection insecure
+        if self.http_request.insecure:
+            l.append('verify=False')
+
         fn_call = f"response = requests.{method.lower()}({', '.join(l)})"
         self.code += fn_call
         self.code += self.new_lines(1)
@@ -77,6 +81,7 @@ def main():
     -H "Cookie: cookie1=cookie_val; cookie2=cookie2_val; "
     -X POST 
     -d "test body" --data-raw "test body2"
+    -k
     http://example.com/example?a=1&b=2'''
     with open('../input.txt', 'r') as f:
         curl_command = f.read()

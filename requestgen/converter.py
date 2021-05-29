@@ -5,11 +5,6 @@ from requestgen.generator.language_java import (apache_http_client,
 from requestgen.generator.language_python import python_generator
 from requestgen.parser import curl_parser
 
-
-class CodeConversionException(Exception):
-    pass
-
-
 from_languages_mapping = {'CURL': curl_parser.CurlParser}
 to_languages_mapping = {'PYTHON_REQUESTS': python_generator.PythonGenerator,
                         'JAVA_APACHE_HTTP_CLIENT': apache_http_client.ApacheHttpClientCodeGenerator,
@@ -26,12 +21,12 @@ class Converter:
             message = f'Language {from_language} not supported\n'
             l = [key for key in from_languages_mapping.keys()]
             message += f'Supported languages to convert from are {", ".join(l)}'
-            raise CodeConversionException(message)
+            raise ValueError(message)
         if not self.code_generator:
             message = f'Language {to_language} not supported\n'
             l = [key for key in to_languages_mapping.keys()]
             message += f'Supported languages to convert to are {", ".join(l)}'
-            raise CodeConversionException(message)
+            raise ValueError(message)
 
     def convert(self, input_code):
         # with open('generator/input.txt', 'r') as f:

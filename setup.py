@@ -1,15 +1,13 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.2'
+VERSION = '1.3'
 DESCRIPTION = 'Converter package'
-LONG_DESCRIPTION = 'This package can be used to generate the code to send http requests in several languages\nAlso it can be used to convert ' \
+LONG_DESCRIPTION = 'This package can be used to generate the code to send http requests in several languages. It can also be used to convert ' \
                    'the code from curl to other languages'
 
 REQUIREMENTS = []
 
-# Setting up
 setup(
-    # the name must match the folder name 'verysimplemodule'
     name="requestgen",
     version=VERSION,
     author="Prajwal Ramakrishna",
@@ -19,18 +17,16 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    install_requires=REQUIREMENTS,  # add any additional packages that
-    # needs to be installed along with your package. Eg: 'caer'
+    install_requires=REQUIREMENTS,
     entry_points={'console_scripts': [
         'convert = requestgen.converter:main',
     ], },
     keywords=['python', 'first package'],
     classifiers=[
-        "Development Status :: 1 - Planning ",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Internet",
-        "License :: OSI Approved :: GNU General Public License (GPL)"
-        "Programming Language :: Python :: 2",
+        "License :: OSI Approved :: GNU General Public License (GPL)",
         "Programming Language :: Python :: 3",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Microsoft :: Windows",

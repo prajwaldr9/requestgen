@@ -10,6 +10,7 @@ class HttpRequest:
     params: str = None
     authentication: str = None
     cookies: dict = None
+    insecure: bool = False
 
     # def set_url(self, url):
     #     self.url = url
